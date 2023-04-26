@@ -55,7 +55,7 @@ Because this Challenge will require a video submission, refer to the [Fullstack 
 Your application should use [Jest](https://www.npmjs.com/package/jest) for running the unit tests and [Inquirer](https://www.npmjs.com/package/inquirer/v/8.2.4) for collecting input from the user. The application will be invoked by using the following command:
 
 ```bash
-node index.js
+node template.js
 ```
 
 It is recommended that you start with a directory structure that looks like the following example:
@@ -71,7 +71,7 @@ It is recommended that you start with a directory structure that looks like the 
 ├── lib/                   // classes
 ├── src/                   // template helper code 
 ├── .gitignore             // indicates which folders and files Git should ignore
-├── index.js               // runs the application
+├── template.js               // runs the application
 └── package.json           
 ```
 

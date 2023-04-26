@@ -1,118 +1,73 @@
-// create the team
-const generateTeam = team => {
+// Runs the app
+const fs = require("fs");
+const inquirer = require("inquirer");
+const template = require("./src/template");
+const managerClass = require("./lib/Manager");
 
-    // create the manager html
-    const generateManager = manager => {
-        return `
-        <div class="card employee-card">
-        <div class="card-header">
-            <h2 class="card-title">${manager.getName()}</h2>
-            <h3 class="card-title"><i class="fas fa-mug-hot mr-2"></i>${manager.getRole()}</h3>
-        </div>
-        <div class="card-body">
-            <ul class="list-group">
-                <li class="list-group-item">ID: ${manager.getId()}</li>
-                <li class="list-group-item">Email: <a href="mailto:${manager.getEmail()}">${manager.getEmail()}</a></li>
-                <li class="list-group-item">Office number: ${manager.getOfficeNumber()}</li>
-            </ul>
-        </div>
-    </div>
-        `;
-    };
+async function init() {
 
-    // create the html for engineers
-    const generateEngineer = engineer => {
-        return `
-        <div class="card employee-card">
-    <div class="card-header">
-        <h2 class="card-title">${engineer.getName()}</h2>
-        <h3 class="card-title"><i class="fas fa-glasses mr-2"></i>${engineer.getRole()}</h3>
-    </div>
-    <div class="card-body">
-        <ul class="list-group">
-            <li class="list-group-item">ID: ${engineer.getId()}</li>
-            <li class="list-group-item">Email: <a href="mailto:${engineer.getEmail()}">${engineer.getEmail()}</a></li>
-            <li class="list-group-item">GitHub: <a href="https://github.com/${engineer.getGithub()}" target="_blank" rel="noopener noreferrer">${engineer.getGithub()}</a></li>
-        </ul>
-    </div>
-</div>
-        `;
-    };
+    const team = [];
+    const manager = await getManager();
+    team.push(manager);
 
-    // create the html for interns
-    const generateIntern = intern => {
-        return `
-        <div class="card employee-card">
-    <div class="card-header">
-        <h2 class="card-title">${intern.getName()}</h2>
-        <h3 class="card-title"><i class="fas fa-user-graduate mr-2"></i>${intern.getRole()}</h3>
-    </div>
-    <div class="card-body">
-        <ul class="list-group">
-            <li class="list-group-item">ID: ${intern.getId()}</li>
-            <li class="list-group-item">Email: <a href="mailto:${intern.getEmail()}">${intern.getEmail()}</a></li>
-            <li class="list-group-item">School: ${intern.getSchool()}</li>
-        </ul>
-    </div>
-</div>
-        `;
-    };
+    // while user does not want to quit {
+    //    prompt what do
+    //    if what do add eng, add eng, etc,
+    // }
+    const managerPrompt = await inquirer.prompt([
+        {
+            type: "list",
+            name: "next",
+            message: "What's next? ",
+            choices: ["Add engineer", "Add intern", "Finish building my team"],
+        },
+    ]);
+    try {
+        fs.writeFileSync("./dist/output.html", template(team));
+        if (managerPrompt.next === "Finish building my team") {
+            // return user input
+        }
 
-    const html = [];
+    } catch (err) {
+        console.log("Logging the error: ", err);
+    }
 
-    html.push(team
-        .filter(employee => employee.getRole() === "Manager")
-        .map(manager => generateManager(manager))
-    );
-    html.push(team
-        .filter(employee => employee.getRole() === "Engineer")
-        .map(engineer => generateEngineer(engineer))
-        .join("")
-    );
-    html.push(team
-        .filter(employee => employee.getRole() === "Intern")
-        .map(intern => generateIntern(intern))
-        .join("")
-    );
 
-    return html.join("");
-
+    console.log("Success. The file has been generated in the 'dist' folder.");
 }
 
-// export function to generate entire page
-module.exports = team => {
+async function getEmployeeDetails(employeeType) {
+    const {name, id, email} = await inquirer.prompt([
+        {
+            type: "input",
+            name: "name",
+            message: `Please enter the team ${employeeType}'s name: `,
+        },
+        {
+            type: "input",
+            name: "id",
+            message: `Please enter the team ${employeeType}'s employee ID: `,
+        },
+        {
+            type: "input",
+            name: "email",
+            message: `Please enter the team ${employeeType}'s email: `,
+        },
+    ]);
+    return {name, id, email};
+}
 
-    return `
-    <!DOCTYPE html>
-<html lang="en">
+async function getManager() {
+    const {name, id, email} = await getEmployeeDetails("manager");
+    const {managerOffice} = await inquirer.prompt([
+        {
+            type: "input",
+            name: "managerOffice",
+            message: "Please enter the team manager's office number: ",
+        },
+    ]);
+    return new managerClass(name, id, email, managerOffice)
+}
 
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <title>My Team</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <link rel="stylesheet" href="style.css">
-    <script src="https://kit.fontawesome.com/c502137733.js"></script>
-</head>
 
-<body>
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-12 jumbotron mb-3 team-heading">
-                <h1 class="text-center">My Team</h1>
-            </div>
-        </div>
-    </div>
-    <div class="container">
-        <div class="row">
-            <div class="team-area col-12 d-flex justify-content-center">
-                ${generateTeam(team)}
-            </div>
-        </div>
-    </div>
-</body>
-</html>
-    `;
-};
+init();
